@@ -111,17 +111,19 @@ async function openPersonaModal(id) {
 
   const isAdmin = MenheraAuth.getIsAdmin();
   const deleteBtnWrap = document.getElementById("persona-modal-delete-wrap");
-  deleteBtnWrap.innerHTML = isAdmin
-    ? `<button class="btn btn-ghost" id="delete-persona-btn">Eliminar persona</button>`
-    : "";
-  if (isAdmin) {
-    document.getElementById("delete-persona-btn").onclick = async () => {
-      if (!confirm(`¿Eliminar a "${p.name}"? Esto también borra sus skills. No se puede deshacer.`)) return;
-      const { error } = await sb.from("personas").delete().eq("id", id);
-      if (error) { alert("Error: " + error.message); return; }
-      document.getElementById("persona-modal").classList.add("hidden");
-      await loadPersonas();
-    };
+  if (deleteBtnWrap) {
+    deleteBtnWrap.innerHTML = isAdmin
+      ? `<button class="btn btn-ghost" id="delete-persona-btn">Eliminar persona</button>`
+      : "";
+    if (isAdmin) {
+      document.getElementById("delete-persona-btn").onclick = async () => {
+        if (!confirm(`¿Eliminar a "${p.name}"? Esto también borra sus skills. No se puede deshacer.`)) return;
+        const { error } = await sb.from("personas").delete().eq("id", id);
+        if (error) { alert("Error: " + error.message); return; }
+        document.getElementById("persona-modal").classList.add("hidden");
+        await loadPersonas();
+      };
+    }
   }
 
   const body = document.getElementById("persona-modal-body");
