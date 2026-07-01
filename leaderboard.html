@@ -45,13 +45,39 @@
         <span id="lb-status" class="dim"></span>
       </div>
 
-      <div class="lb-columns" id="lb-export-target">
+      <div class="panel" style="padding:16px 20px; margin-bottom:18px;">
+        <strong>Importar desde captura</strong>
+        <p class="dim" style="font-size:13px; margin:6px 0 0;">
+          Haz una captura de la tabla de puntuaciones y pídele a una IA (Claude, ChatGPT…) algo así:
+          <em>"Transcribe esta tabla y dame el resultado en líneas con formato puesto,nombre,puntos, sin encabezados ni texto extra"</em>.
+          Pega el resultado abajo, en el hueco del guild que corresponda, y dale a Importar.
+        </p>
+      </div>
+
+      <div class="lb-columns">
         <div>
-          <h3>Compañío A</h3>
+          <details class="import-box">
+            <summary>Importar desde texto</summary>
+            <textarea id="import-text-A" rows="6" placeholder="1,Benyamin Hibiki,3074180924&#10;2,FengShui Salesman,2527569740&#10;…"></textarea>
+            <button class="btn btn-ghost" id="import-btn-A">Importar en Guild 1</button>
+          </details>
+        </div>
+        <div>
+          <details class="import-box">
+            <summary>Importar desde texto</summary>
+            <textarea id="import-text-B" rows="6" placeholder="1,Benyamin Hibiki,3074180924&#10;2,FengShui Salesman,2527569740&#10;…"></textarea>
+            <button class="btn btn-ghost" id="import-btn-B">Importar en Guild 2</button>
+          </details>
+        </div>
+      </div>
+
+      <div class="lb-columns" id="lb-export-target" style="margin-top:14px;">
+        <div>
+          <h3>Guild 1</h3>
           <table class="lb-table" id="table-A"></table>
         </div>
         <div>
-          <h3>Compañío B</h3>
+          <h3>Guild 2</h3>
           <table class="lb-table" id="table-B"></table>
         </div>
       </div>

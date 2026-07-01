@@ -1,3 +1,29 @@
+.import-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--red-deep);
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+.import-box summary {
+  cursor: pointer;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--bone-dim);
+}
+.import-box summary:hover { color: var(--bone); }
+.import-box textarea {
+  width: 100%;
+  margin-top: 10px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+.import-box .btn {
+  margin-top: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
 .lb-toolbar {
   display: flex;
   align-items: flex-end;

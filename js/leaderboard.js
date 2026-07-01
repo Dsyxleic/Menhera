@@ -4,6 +4,7 @@
 
 let CURRENT_WEEK_ID = null;
 let CURRENT_ENTRIES = { A: {}, B: {} }; // puesto -> {nombre, puntos}
+const COMPANY_LABELS = { A: "Guild 1", B: "Guild 2" };
 
 function escapeHtml(s) {
   return (s || "").replace(/[&<>"']/g, (c) => ({
@@ -118,6 +119,48 @@ async function createWeek() {
   await loadWeekEntries();
 }
 
+// ---------------- Importar desde texto pegado ----------------
+
+function importPastedText(company) {
+  const statusEl = document.getElementById("lb-status");
+  const raw = document.getElementById("import-text-" + company).value;
+  const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  if (lines.length === 0) {
+    statusEl.textContent = "Pega algo de texto primero.";
+    return;
+  }
+
+  let count = 0;
+  lines.forEach((line, i) => {
+    // admite separadores por coma, tabulador, o 2+ espacios
+    const parts = line.split(/\t|,|\s{2,}/).map((p) => p.trim()).filter((p) => p !== "");
+    if (parts.length < 2) return;
+
+    let puesto, nombre, puntosRaw;
+    if (parts.length >= 3 && /^\d+$/.test(parts[0])) {
+      // formato: puesto, nombre, puntos
+      puesto = parseInt(parts[0], 10);
+      puntosRaw = parts[parts.length - 1];
+      nombre = parts.slice(1, parts.length - 1).join(" ");
+    } else {
+      // formato: nombre, puntos (sin puesto explícito -> orden de aparición)
+      puesto = i + 1;
+      puntosRaw = parts[parts.length - 1];
+      nombre = parts.slice(0, parts.length - 1).join(" ");
+    }
+
+    const puntos = parseInt(puntosRaw.replace(/[^\d]/g, ""), 10);
+    if (!nombre || isNaN(puntos) || puesto < 1 || puesto > 30) return;
+
+    CURRENT_ENTRIES[company][puesto] = { nombre, puntos };
+    count++;
+  });
+
+  renderTables();
+  statusEl.textContent = `Importadas ${count} filas en ${COMPANY_LABELS[company]} — revisa y dale a "Guardar puntuaciones".`;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadWeeks();
 
@@ -128,6 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("new-week-btn").addEventListener("click", createWeek);
   document.getElementById("save-lb-btn").addEventListener("click", saveLeaderboard);
   document.getElementById("export-lb-img-btn").addEventListener("click", exportLeaderboardImage);
+  document.getElementById("import-btn-A").addEventListener("click", () => importPastedText("A"));
+  document.getElementById("import-btn-B").addEventListener("click", () => importPastedText("B"));
 
   MenheraAuth.onChange(({ isAdmin }) => {
     document.getElementById("lb-root").classList.toggle("hidden", !isAdmin);
@@ -164,7 +209,7 @@ async function exportLeaderboardImage() {
     h.style.color = "#efe6dd";
     h.style.fontSize = "16px";
     h.style.marginBottom = "8px";
-    h.textContent = "Compañío " + company;
+    h.textContent = COMPANY_LABELS[company];
     col.appendChild(h);
 
     const table = document.createElement("table");
