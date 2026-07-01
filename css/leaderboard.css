@@ -1,0 +1,55 @@
+.lb-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+.lb-toolbar select { min-width: 220px; }
+
+.lb-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.lb-table th {
+  font-family: var(--f-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--bone-dim);
+}
+.lb-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.lb-table td.puesto {
+  font-family: var(--f-mono);
+  color: var(--red-glow);
+  width: 40px;
+}
+.lb-table tr:nth-child(odd) td {
+  background: rgba(255,255,255,0.015);
+}
+.lb-table tr:hover td {
+  background: rgba(216,30,44,0.08);
+}
+.lb-table input {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+.lb-table input[type="number"] { text-align: right; }
+
+@media (max-width: 800px) {
+  .lb-columns { grid-template-columns: 1fr; }
+}
