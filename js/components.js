@@ -13,6 +13,7 @@ function renderHeader(activePage) {
     { href: "library.html", ch: "03", label: "BIBLIOTECA", key: "library" },
     { href: "leaderboard.html", ch: "04", label: "PUNTUACIONES", key: "leaderboard" },
     { href: "characters.html", ch: "05", label: "PERSONAJES", key: "characters" },
+    { href: "personas.html", ch: "06", label: "PERSONAS", key: "personas" },
   ];
 
   el.innerHTML = `

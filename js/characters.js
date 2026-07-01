@@ -26,9 +26,11 @@ async function loadCharacters() {
   grid.innerHTML = CHAR_CACHE
     .map(
       (c) => `
-      <div class="char-card panel" data-id="${c.id}" style="background:${c.color_bg};">
-        <div class="char-card-img" style="${c.avatar_url ? `background-image:url('${c.avatar_url}')` : ""}"></div>
-        <div class="char-card-body" style="color:${c.color_text};">
+      <div class="char-card panel" data-id="${c.id}" style="--card-accent:${c.color_bg};">
+        <div class="char-card-img">
+          ${c.avatar_url ? `<img src="${c.avatar_url}" alt="${escapeHtml(c.name)}" />` : `<span class="no-img">Sin imagen</span>`}
+        </div>
+        <div class="char-card-body">
           <div class="char-card-name">${escapeHtml(c.name)}</div>
           <div class="char-card-sub">${escapeHtml(c.subtype || c.role || "")}</div>
         </div>

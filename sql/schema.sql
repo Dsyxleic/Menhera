@@ -49,12 +49,36 @@ create table if not exists bosses (
   created_at timestamptz default now()
 );
 
+-- 4b) Modos de juego (para filtrar rotaciones)
+create table if not exists game_modes (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  created_at timestamptz default now()
+);
+
+-- 4c) Personas (independientes de los personajes jugables)
+create table if not exists personas (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  avatar_url text,
+  sort_order int default 0,
+  created_at timestamptz default now()
+);
+
+create table if not exists persona_skills (
+  id uuid primary key default gen_random_uuid(),
+  persona_id uuid references personas(id) on delete cascade,
+  label text not null,
+  sort_order int default 0
+);
+
 -- 5) Rotaciones
 create table if not exists rotations (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   notes text,
   boss_id uuid references bosses(id) on delete set null,
+  game_mode_id uuid references game_modes(id) on delete set null,
   dps_character_id uuid references characters(id) on delete set null,
   wonder_knife text,
   wonder_persona text,
@@ -87,6 +111,9 @@ create table if not exists leaderboard_entries (
 alter table characters enable row level security;
 alter table character_actions enable row level security;
 alter table bosses enable row level security;
+alter table game_modes enable row level security;
+alter table personas enable row level security;
+alter table persona_skills enable row level security;
 alter table rotations enable row level security;
 alter table leaderboard_weeks enable row level security;
 alter table leaderboard_entries enable row level security;
@@ -96,6 +123,9 @@ alter table admins enable row level security;
 create policy "public read characters" on characters for select using (true);
 create policy "public read character_actions" on character_actions for select using (true);
 create policy "public read bosses" on bosses for select using (true);
+create policy "public read game_modes" on game_modes for select using (true);
+create policy "public read personas" on personas for select using (true);
+create policy "public read persona_skills" on persona_skills for select using (true);
 create policy "public read rotations" on rotations for select using (true);
 create policy "public read leaderboard_weeks" on leaderboard_weeks for select using (true);
 create policy "public read leaderboard_entries" on leaderboard_entries for select using (true);
@@ -104,6 +134,9 @@ create policy "public read leaderboard_entries" on leaderboard_entries for selec
 create policy "admin write characters" on characters for all using (is_admin()) with check (is_admin());
 create policy "admin write character_actions" on character_actions for all using (is_admin()) with check (is_admin());
 create policy "admin write bosses" on bosses for all using (is_admin()) with check (is_admin());
+create policy "admin write game_modes" on game_modes for all using (is_admin()) with check (is_admin());
+create policy "admin write personas" on personas for all using (is_admin()) with check (is_admin());
+create policy "admin write persona_skills" on persona_skills for all using (is_admin()) with check (is_admin());
 create policy "admin write rotations" on rotations for all using (is_admin()) with check (is_admin());
 create policy "admin write leaderboard_weeks" on leaderboard_weeks for all using (is_admin()) with check (is_admin());
 create policy "admin write leaderboard_entries" on leaderboard_entries for all using (is_admin()) with check (is_admin());

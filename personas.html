@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Personas — Menhera</title>
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/characters.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<div class="crt-vignette"></div>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow">Canal 06</div>
+    <h1>Personas</h1>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="wrap">
+
+    <div id="add-persona-panel" class="panel add-character-panel hidden" data-admin-only>
+      <h3 style="margin-bottom:14px;">Añadir persona</h3>
+      <div class="add-grid">
+        <div>
+          <label>Nombre</label>
+          <input id="new-persona-name" placeholder="ej. Dominion" />
+        </div>
+        <div>
+          <label>Imagen</label>
+          <input id="new-persona-image" type="file" accept="image/*" />
+        </div>
+      </div>
+      <button class="btn btn-primary" id="save-persona-btn" style="margin-top:14px;">Guardar persona</button>
+      <span id="persona-save-status" class="dim" style="margin-left:12px; font-size:13px;"></span>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:24px 0 14px;">
+      <h3>Roster de personas</h3>
+      <button class="btn btn-ghost hidden" id="toggle-add-persona-btn" data-admin-only>+ Nueva persona</button>
+    </div>
+
+    <div id="persona-grid" class="character-grid">
+      <p class="dim">Cargando…</p>
+    </div>
+
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<div id="persona-modal" class="modal-backdrop hidden">
+  <div class="modal panel">
+    <div class="modal-head">
+      <h3 id="persona-modal-name">—</h3>
+      <button class="btn btn-ghost" id="persona-modal-close-btn">Cerrar</button>
+    </div>
+    <div id="persona-modal-body"></div>
+  </div>
+</div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/components.js"></script>
+<script src="js/personas.js"></script>
+<script>mountChrome('personas');</script>
+</body>
+</html>

@@ -30,6 +30,10 @@ async function loadRotation() {
     const { data: boss } = await sb.from("bosses").select("name").eq("id", r.boss_id).single();
     if (boss) metaParts.push(`Jefe: ${boss.name}`);
   }
+  if (r.game_mode_id) {
+    const { data: mode } = await sb.from("game_modes").select("name").eq("id", r.game_mode_id).single();
+    if (mode) metaParts.push(`Modo: ${mode.name}`);
+  }
   if (r.dps_character_id) {
     const { data: c } = await sb.from("characters").select("name").eq("id", r.dps_character_id).single();
     if (c) metaParts.push(`DPS: ${c.name}`);
@@ -41,12 +45,27 @@ async function loadRotation() {
     document.getElementById("rv-notes").innerHTML = `<strong>Notas:</strong> ${escapeHtml(r.notes)}`;
   }
 
-  if (r.wonder_knife || r.wonder_persona) {
+  const grid0 = r.grid || {};
+  const personaIds = (grid0.wonder?.personas || []).filter((s) => s && s.personaId).map((s) => s.personaId);
+  let personaMap = {};
+  if (personaIds.length) {
+    const { data: personas } = await sb.from("personas").select("*").in("id", personaIds);
+    (personas || []).forEach((p) => (personaMap[p.id] = p));
+  }
+
+  if (r.wonder_knife || personaIds.length) {
     document.getElementById("rv-wonder").classList.remove("hidden");
+    const personaHtml = (grid0.wonder?.personas || [])
+      .filter((s) => s && s.personaId)
+      .map((s) => {
+        const p = personaMap[s.personaId];
+        return `<span class="export-persona">${p && p.avatar_url ? `<img src="${p.avatar_url}" />` : ""}${p ? escapeHtml(p.name) : ""}${s.skillLabel ? ` — ${escapeHtml(s.skillLabel)}` : ""}</span>`;
+      })
+      .join("  ");
     document.getElementById("rv-wonder").innerHTML = `
       <strong>Wonder</strong> —
-      ${r.wonder_knife ? `Cuchillo: ${escapeHtml(r.wonder_knife)}` : ""}
-      ${r.wonder_persona ? ` &nbsp; Persona: ${escapeHtml(r.wonder_persona)}` : ""}
+      ${r.wonder_knife ? `Cuchillo: ${escapeHtml(r.wonder_knife)} &nbsp; ` : ""}
+      ${personaHtml}
     `;
   }
 
@@ -55,10 +74,15 @@ async function loadRotation() {
   const charMap = {};
   (chars || []).forEach((c) => (charMap[c.id] = c));
 
+  const TAG_COLORS = { hl: "#e8c34a", navi: "#9fe6a0", teurgia: "#9fd0f0" };
+
   let html = `<table class="export-table" style="width:100%;">
     <thead><tr>${grid.columns.map((id) => {
       const c = charMap[id];
-      return `<th style="background:${c ? c.color_bg : "#2c1f21"}; color:${c ? c.color_text : "#efe6dd"}">${c ? escapeHtml(c.name) : "—"}</th>`;
+      return `<th style="background:${c ? c.color_bg : "#2c1f21"}; color:${c ? c.color_text : "#efe6dd"}">
+        ${c && c.avatar_url ? `<img src="${c.avatar_url}" class="th-avatar" />` : ""}
+        ${c ? escapeHtml(c.name) : "—"}
+      </th>`;
     }).join("")}</tr></thead>
     <tbody>`;
 
@@ -68,7 +92,9 @@ async function loadRotation() {
       html += "<tr>";
       turn.cells.forEach((cell) => {
         const entry = cell[row];
-        html += `<td class="${entry?.highlight ? "hl" : ""}">${entry ? escapeHtml(entry.actionLabel || "") : ""}</td>`;
+        const color = entry?.tag ? TAG_COLORS[entry.tag] : null;
+        const style = color ? `style="background:${color}2e; color:${color}; font-weight:600;"` : "";
+        html += `<td ${style}>${entry ? escapeHtml(entry.actionLabel || "") : ""}</td>`;
       });
       html += "</tr>";
     }

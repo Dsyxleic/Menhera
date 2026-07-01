@@ -47,6 +47,40 @@
   padding: 6px 10px;
   color: var(--bone-dim);
   border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.turn-cell-head .head-avatar {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.entry-avatar {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.tag-dots {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.tag-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.45;
+}
+.tag-dot.is-active {
+  opacity: 1;
+  outline: 2px solid var(--bone);
+  outline-offset: 1px;
 }
 .entry-row {
   display: flex;
@@ -55,9 +89,12 @@
   padding: 6px 8px;
   border-bottom: 1px solid var(--line);
 }
-.entry-row.is-highlight {
-  background: rgba(216,30,44,0.18);
-  border-left: 3px solid var(--red-glow);
+.export-table th .th-avatar {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 6px;
 }
 .entry-row select, .entry-row input[type="text"] {
   flex: 1;
@@ -84,9 +121,36 @@
   padding: 4px 8px;
 }
 
-@media (max-width: 900px) {
-  .turn-row { grid-template-columns: 1fr; }
+.wonder-persona-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
+.persona-slot {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+.persona-slot .persona-slot-avatar {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+.persona-slot .persona-slot-avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bone-dim);
+  font-family: var(--f-mono);
+  font-size: 11px;
+}
+.persona-slot select { width: 100%; }
 
 .modal-backdrop {
   position: fixed;
@@ -128,6 +192,25 @@
   color: var(--bone-dim);
   margin-bottom: 14px;
 }
+.export-wonder {
+  font-size: 13px;
+  color: var(--bone-dim);
+  margin-bottom: 14px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.export-persona {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.export-persona img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
 .export-table {
   width: 100%;
   border-collapse: collapse;
@@ -147,4 +230,8 @@
   background: rgba(216,30,44,0.25);
   color: var(--red-glow);
   font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .turn-row { grid-template-columns: 1fr; }
 }

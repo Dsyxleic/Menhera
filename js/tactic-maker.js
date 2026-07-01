@@ -3,16 +3,30 @@
 // ============================================================
 
 let ROSTER = [];
+let PERSONAS = [];
+let PERSONA_SKILLS_CACHE = {};
 let COLUMN_COUNT = 4;
 let TURNS = []; // [{ cells: [ [entry,...], [entry,...], ... ] }]
+let WONDER_PERSONAS = [null, null, null]; // [{ personaId, skillLabel }, ...]
 let EDITING_ROTATION_ID = null;
+
+// Paleta de etiquetas de color para las acciones (fácil de ampliar)
+const TAG_DEFS = [
+  { key: "hl", label: "HL", color: "#e8c34a" },
+  { key: "navi", label: "Navi", color: "#9fe6a0" },
+  { key: "teurgia", label: "Teurgia", color: "#9fd0f0" },
+];
+
+function tagDef(key) {
+  return TAG_DEFS.find((t) => t.key === key) || null;
+}
 
 function uid() {
   return Math.random().toString(36).slice(2, 9);
 }
 
 function emptyEntry(characterId) {
-  return { id: uid(), characterId: characterId || "", actionLabel: "", highlight: false };
+  return { id: uid(), characterId: characterId || "", actionLabel: "", tag: null };
 }
 
 function newTurn() {
@@ -33,12 +47,92 @@ async function loadRosterAndBosses() {
     `<option value="">— Sin jefe —</option>` +
     (bosses || []).map((b) => `<option value="${b.id}">${escapeHtml(b.name)}</option>`).join("");
 
+  const { data: modes } = await sb.from("game_modes").select("*").order("name");
+  const modeSelect = document.getElementById("rot-mode");
+  modeSelect.innerHTML =
+    `<option value="">— Sin especificar —</option>` +
+    (modes || []).map((m) => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join("");
+
   const dpsSelect = document.getElementById("rot-dps");
   dpsSelect.innerHTML =
     `<option value="">— Sin especificar —</option>` +
     ROSTER.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
 
   renderColumnSelectors();
+}
+
+async function loadPersonasData() {
+  const { data: personas } = await sb.from("personas").select("*").order("sort_order");
+  PERSONAS = personas || [];
+
+  const { data: skills } = await sb.from("persona_skills").select("*").order("sort_order");
+  PERSONA_SKILLS_CACHE = {};
+  (skills || []).forEach((s) => {
+    if (!PERSONA_SKILLS_CACHE[s.persona_id]) PERSONA_SKILLS_CACHE[s.persona_id] = [];
+    PERSONA_SKILLS_CACHE[s.persona_id].push(s);
+  });
+
+  renderWonderPersonaSlots();
+}
+
+async function createGameMode() {
+  const name = prompt("Nombre del modo de juego:");
+  if (!name) return;
+  const { error } = await sb.from("game_modes").insert({ name: name.trim() });
+  if (error) { alert("Error: " + error.message); return; }
+  await loadRosterAndBosses();
+}
+
+function renderWonderPersonaSlots() {
+  const box = document.getElementById("wonder-persona-slots");
+  box.innerHTML = "";
+
+  for (let i = 0; i < 3; i++) {
+    const slot = WONDER_PERSONAS[i] || { personaId: "", skillLabel: "" };
+    const persona = PERSONAS.find((p) => p.id === slot.personaId);
+    const skills = persona ? PERSONA_SKILLS_CACHE[persona.id] || [] : [];
+
+    const div = document.createElement("div");
+    div.className = "persona-slot";
+
+    const avatar = document.createElement(persona?.avatar_url ? "img" : "div");
+    avatar.className = "persona-slot-avatar" + (persona?.avatar_url ? "" : " placeholder");
+    if (persona?.avatar_url) {
+      avatar.src = persona.avatar_url;
+    } else {
+      avatar.textContent = "Sin foto";
+    }
+    div.appendChild(avatar);
+
+    const personaSelect = document.createElement("select");
+    personaSelect.innerHTML =
+      `<option value="">— Elegir persona —</option>` +
+      PERSONAS.map((p) => `<option value="${p.id}" ${slot.personaId === p.id ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("");
+    personaSelect.onchange = () => {
+      WONDER_PERSONAS[i] = { personaId: personaSelect.value, skillLabel: "" };
+      renderWonderPersonaSlots();
+    };
+    div.appendChild(personaSelect);
+
+    const skillSelect = document.createElement("select");
+    skillSelect.innerHTML =
+      `<option value="">— Elegir skill —</option>` +
+      skills.map((s) => `<option value="${escapeHtml(s.label)}" ${slot.skillLabel === s.label ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("") +
+      `<option value="__custom__">✎ Escribir manualmente…</option>`;
+    skillSelect.disabled = !persona;
+    skillSelect.onchange = () => {
+      if (skillSelect.value === "__custom__") {
+        const custom = prompt("Escribe la skill:", slot.skillLabel || "");
+        WONDER_PERSONAS[i] = { personaId: slot.personaId, skillLabel: custom || "" };
+      } else {
+        WONDER_PERSONAS[i] = { personaId: slot.personaId, skillLabel: skillSelect.value };
+      }
+      renderWonderPersonaSlots();
+    };
+    div.appendChild(skillSelect);
+
+    box.appendChild(div);
+  }
 }
 
 function renderColumnSelectors() {
@@ -131,7 +225,9 @@ function renderTurns() {
 
       const head = document.createElement("div");
       head.className = "turn-cell-head";
-      head.textContent = character ? character.name : `Columna ${colIdx + 1}`;
+      head.innerHTML = character
+        ? `${character.avatar_url ? `<img src="${character.avatar_url}" alt="" class="head-avatar" />` : ""}<span>${escapeHtml(character.name)}</span>`
+        : `<span>Columna ${colIdx + 1}</span>`;
       cell.appendChild(head);
 
       turn.cells[colIdx].forEach((entry) => {
@@ -169,7 +265,19 @@ function renderTurns() {
 
 function renderEntryRow(entry, character) {
   const div = document.createElement("div");
-  div.className = "entry-row" + (entry.highlight ? " is-highlight" : "");
+  div.className = "entry-row";
+  const tag = tagDef(entry.tag);
+  if (tag) {
+    div.style.background = hexToRgba(tag.color, 0.18);
+    div.style.borderLeft = `3px solid ${tag.color}`;
+  }
+
+  if (character?.avatar_url) {
+    const avatar = document.createElement("img");
+    avatar.src = character.avatar_url;
+    avatar.className = "entry-avatar";
+    div.appendChild(avatar);
+  }
 
   const actionOptions = character
     ? ROSTER_ACTIONS_CACHE[character.id] || []
@@ -191,16 +299,20 @@ function renderEntryRow(entry, character) {
     }
   };
 
-  const highlightBtn = document.createElement("button");
-  highlightBtn.className = "btn btn-ghost";
-  highlightBtn.type = "button";
-  highlightBtn.title = "Marcar como highlight";
-  highlightBtn.textContent = "★";
-  highlightBtn.style.color = entry.highlight ? "var(--red-glow)" : "var(--bone-dim)";
-  highlightBtn.onclick = () => {
-    entry.highlight = !entry.highlight;
-    renderTurns();
-  };
+  const tagsWrap = document.createElement("div");
+  tagsWrap.className = "tag-dots";
+  TAG_DEFS.forEach((t) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "tag-dot" + (entry.tag === t.key ? " is-active" : "");
+    dot.style.background = t.color;
+    dot.title = t.label;
+    dot.onclick = () => {
+      entry.tag = entry.tag === t.key ? null : t.key;
+      renderTurns();
+    };
+    tagsWrap.appendChild(dot);
+  });
 
   const delBtn = document.createElement("button");
   delBtn.className = "btn btn-ghost";
@@ -215,9 +327,17 @@ function renderEntryRow(entry, character) {
   };
 
   div.appendChild(select);
-  div.appendChild(highlightBtn);
+  div.appendChild(tagsWrap);
   div.appendChild(delBtn);
   return div;
+}
+
+function hexToRgba(hex, alpha) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 // ---------------- Cache de acciones por personaje ----------------
@@ -254,7 +374,7 @@ async function saveRotation() {
     turns: TURNS,
     wonder: {
       knife: document.getElementById("wonder-knife").value.trim(),
-      persona: document.getElementById("wonder-persona").value.trim(),
+      personas: WONDER_PERSONAS,
     },
   };
 
@@ -262,9 +382,9 @@ async function saveRotation() {
     title,
     notes: document.getElementById("rot-notes").value.trim(),
     boss_id: document.getElementById("rot-boss").value || null,
+    game_mode_id: document.getElementById("rot-mode").value || null,
     dps_character_id: document.getElementById("rot-dps").value || null,
     wonder_knife: grid.wonder.knife,
-    wonder_persona: grid.wonder.persona,
     grid,
     updated_at: new Date().toISOString(),
   };
@@ -292,13 +412,14 @@ async function loadRotationForEdit(id) {
   document.getElementById("rot-title").value = data.title || "";
   document.getElementById("rot-notes").value = data.notes || "";
   document.getElementById("wonder-knife").value = data.wonder_knife || "";
-  document.getElementById("wonder-persona").value = data.wonder_persona || "";
   if (data.boss_id) document.getElementById("rot-boss").value = data.boss_id;
+  if (data.game_mode_id) document.getElementById("rot-mode").value = data.game_mode_id;
   if (data.dps_character_id) document.getElementById("rot-dps").value = data.dps_character_id;
 
   const grid = data.grid || { columns: [], turns: [] };
   COLUMN_COUNT = grid.columns?.length || 4;
   TURNS = grid.turns || [];
+  WONDER_PERSONAS = grid.wonder?.personas || [null, null, null];
 
   renderColumnSelectors();
   // reaplicar selección de columnas guardadas
@@ -306,6 +427,7 @@ async function loadRotationForEdit(id) {
   selects.forEach((s, i) => { if (grid.columns && grid.columns[i]) s.value = grid.columns[i]; });
 
   renderTurns();
+  renderWonderPersonaSlots();
 }
 
 // ---------------- Nuevo jefe ----------------
@@ -325,14 +447,27 @@ function renderExportPreview() {
   const assignments = getColumnAssignments();
   const title = document.getElementById("rot-title").value.trim() || "Rotación sin título";
   const notes = document.getElementById("rot-notes").value.trim();
+  const knife = document.getElementById("wonder-knife").value.trim();
+
+  const personaHtml = WONDER_PERSONAS
+    .filter((s) => s && s.personaId)
+    .map((s) => {
+      const p = PERSONAS.find((x) => x.id === s.personaId);
+      return `<span class="export-persona">${p && p.avatar_url ? `<img src="${p.avatar_url}" />` : ""}${p ? escapeHtml(p.name) : ""}${s.skillLabel ? ` — ${escapeHtml(s.skillLabel)}` : ""}</span>`;
+    })
+    .join("");
 
   let html = `<div class="export-sheet">
     <div class="export-title">${escapeHtml(title)}</div>
     ${notes ? `<div class="export-notes">${escapeHtml(notes)}</div>` : ""}
+    ${knife || personaHtml ? `<div class="export-wonder">${knife ? `<strong>Cuchillo:</strong> ${escapeHtml(knife)} &nbsp; ` : ""}${personaHtml}</div>` : ""}
     <table class="export-table">
       <thead><tr>${assignments.map((id) => {
         const c = ROSTER.find((x) => x.id === id);
-        return `<th style="background:${c ? c.color_bg : "#2c1f21"}; color:${c ? c.color_text : "#efe6dd"}">${c ? escapeHtml(c.name) : "—"}</th>`;
+        return `<th style="background:${c ? c.color_bg : "#2c1f21"}; color:${c ? c.color_text : "#efe6dd"}">
+          ${c && c.avatar_url ? `<img src="${c.avatar_url}" class="th-avatar" />` : ""}
+          ${c ? escapeHtml(c.name) : "—"}
+        </th>`;
       }).join("")}</tr></thead>
       <tbody>`;
 
@@ -342,7 +477,9 @@ function renderExportPreview() {
       html += "<tr>";
       turn.cells.forEach((cell) => {
         const entry = cell[r];
-        html += `<td class="${entry?.highlight ? "hl" : ""}">${entry ? escapeHtml(entry.actionLabel || "") : ""}</td>`;
+        const tag = entry ? tagDef(entry.tag) : null;
+        const style = tag ? `style="background:${hexToRgba(tag.color, 0.28)}; color:${tag.color}; font-weight:600;"` : "";
+        html += `<td ${style}>${entry ? escapeHtml(entry.actionLabel || "") : ""}</td>`;
       });
       html += "</tr>";
     }
@@ -376,9 +513,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("add-turn-btn").addEventListener("click", addTurn);
   document.getElementById("save-rotation-btn").addEventListener("click", saveRotation);
   document.getElementById("new-boss-btn").addEventListener("click", createBoss);
+  document.getElementById("new-mode-btn").addEventListener("click", createGameMode);
 
   await loadAllActions();
   await loadRosterAndBosses();
+  await loadPersonasData();
 
   const params = new URLSearchParams(window.location.search);
   const editId = params.get("id");

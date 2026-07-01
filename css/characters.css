@@ -26,19 +26,34 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.15s, border-color 0.15s;
+  background: var(--panel);
 }
 .char-card:hover {
   transform: translateY(-2px);
   border-color: var(--red);
 }
 .char-card-img {
-  height: 130px;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--panel-raised);
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-raised);
+  padding: 10px;
+}
+.char-card-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5));
+}
+.char-card-img .no-img {
+  font-family: var(--f-mono);
+  color: var(--bone-dim);
+  font-size: 13px;
 }
 .char-card-body {
   padding: 10px 12px;
+  border-top: 3px solid var(--card-accent, var(--red-deep));
 }
 .char-card-name {
   font-family: var(--f-display);

@@ -46,6 +46,13 @@
             </div>
           </div>
           <div>
+            <label>Modo de juego</label>
+            <div style="display:flex; gap:6px;">
+              <select id="rot-mode" style="flex:1;"></select>
+              <button class="btn btn-ghost" id="new-mode-btn" title="Nuevo modo">+</button>
+            </div>
+          </div>
+          <div>
             <label>Personaje DPS (para archivo)</label>
             <select id="rot-dps"></select>
           </div>
@@ -66,16 +73,12 @@
       <!-- Wonder -->
       <div class="panel setup-panel" style="margin-top:14px;">
         <h3 style="margin-bottom:12px;">Wonder</h3>
-        <div class="setup-grid">
-          <div>
-            <label>Cuchillo</label>
-            <input id="wonder-knife" placeholder="ej. Surt" style="width:100%;" />
-          </div>
-          <div>
-            <label>Persona</label>
-            <input id="wonder-persona" placeholder="ej. Dominion" style="width:100%;" />
-          </div>
+        <div style="margin-bottom:16px;">
+          <label>Cuchillo</label>
+          <input id="wonder-knife" placeholder="ej. Surt" style="max-width:280px;" />
         </div>
+        <label style="display:block; margin-bottom:8px;">Personas</label>
+        <div id="wonder-persona-slots" class="wonder-persona-slots"></div>
       </div>
 
       <!-- Grid de turnos -->
