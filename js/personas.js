@@ -110,6 +110,20 @@ async function openPersonaModal(id) {
   document.getElementById("persona-modal").classList.remove("hidden");
 
   const isAdmin = MenheraAuth.getIsAdmin();
+  const deleteBtnWrap = document.getElementById("persona-modal-delete-wrap");
+  deleteBtnWrap.innerHTML = isAdmin
+    ? `<button class="btn btn-ghost" id="delete-persona-btn">Eliminar persona</button>`
+    : "";
+  if (isAdmin) {
+    document.getElementById("delete-persona-btn").onclick = async () => {
+      if (!confirm(`¿Eliminar a "${p.name}"? Esto también borra sus skills. No se puede deshacer.`)) return;
+      const { error } = await sb.from("personas").delete().eq("id", id);
+      if (error) { alert("Error: " + error.message); return; }
+      document.getElementById("persona-modal").classList.add("hidden");
+      await loadPersonas();
+    };
+  }
+
   const body = document.getElementById("persona-modal-body");
   body.innerHTML = `<p class="dim">Cargando skills…</p>`;
 
@@ -128,9 +142,23 @@ async function openPersonaModal(id) {
     ${
       isAdmin
         ? `
-      <div style="display:flex; gap:8px; margin-bottom:16px; align-items:center;">
-        <input id="edit-persona-link-url" placeholder="Link externo (https://…)" value="${p.link_url ? escapeHtmlP(p.link_url) : ""}" style="flex:1;" />
-        <button class="btn btn-ghost" id="save-persona-link-btn">Guardar link</button>
+      <div class="panel" style="padding:14px; margin-bottom:18px; border-left:3px solid var(--red);">
+        <div class="add-grid">
+          <div>
+            <label>Nombre</label>
+            <input id="edit-persona-name" value="${escapeHtmlP(p.name)}" />
+          </div>
+          <div>
+            <label>Reemplazar imagen</label>
+            <input id="edit-persona-image" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>Link externo</label>
+            <input id="edit-persona-link-url" placeholder="https://…" value="${p.link_url ? escapeHtmlP(p.link_url) : ""}" />
+          </div>
+        </div>
+        <button class="btn btn-primary" id="save-edit-persona-btn" style="margin-top:12px;">Guardar cambios</button>
+        <span id="edit-persona-status" class="dim" style="margin-left:10px; font-size:13px;"></span>
       </div>
     `
         : ""
@@ -160,10 +188,43 @@ async function openPersonaModal(id) {
   `;
 
   if (isAdmin) {
-    document.getElementById("save-persona-link-btn").onclick = async () => {
-      const url = document.getElementById("edit-persona-link-url").value.trim();
-      await sb.from("personas").update({ link_url: url || null }).eq("id", id);
+    document.getElementById("save-edit-persona-btn").onclick = async () => {
+      const statusEl = document.getElementById("edit-persona-status");
+      const name = document.getElementById("edit-persona-name").value.trim();
+      if (!name) {
+        statusEl.textContent = "El nombre no puede estar vacío.";
+        return;
+      }
+
+      statusEl.textContent = "Guardando…";
+
+      const payload = {
+        name,
+        link_url: document.getElementById("edit-persona-link-url").value.trim() || null,
+      };
+
+      const fileInput = document.getElementById("edit-persona-image");
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const path = `personas/${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+        const { error: uploadError } = await sb.storage.from("character-images").upload(path, file);
+        if (uploadError) {
+          statusEl.textContent = "Error subiendo imagen: " + uploadError.message;
+          return;
+        }
+        const { data: urlData } = sb.storage.from("character-images").getPublicUrl(path);
+        payload.avatar_url = urlData.publicUrl;
+      }
+
+      const { error: updateError } = await sb.from("personas").update(payload).eq("id", id);
+      if (updateError) {
+        statusEl.textContent = "Error: " + updateError.message;
+        return;
+      }
+
+      statusEl.textContent = "Guardado ✓";
       await loadPersonas();
+      document.getElementById("persona-modal-name").textContent = name;
     };
 
     document.getElementById("add-persona-skill-btn").onclick = async () => {

@@ -131,6 +131,20 @@ async function openCharModal(id) {
   document.getElementById("char-modal").classList.remove("hidden");
 
   const isAdmin = MenheraAuth.getIsAdmin();
+  const deleteBtnWrap = document.getElementById("modal-delete-wrap");
+  deleteBtnWrap.innerHTML = isAdmin
+    ? `<button class="btn btn-ghost" id="delete-char-btn">Eliminar personaje</button>`
+    : "";
+  if (isAdmin) {
+    document.getElementById("delete-char-btn").onclick = async () => {
+      if (!confirm(`¿Eliminar a "${c.name}"? Esto también borra sus skills. No se puede deshacer.`)) return;
+      const { error } = await sb.from("characters").delete().eq("id", id);
+      if (error) { alert("Error: " + error.message); return; }
+      document.getElementById("char-modal").classList.add("hidden");
+      await loadCharacters();
+    };
+  }
+
   const body = document.getElementById("modal-body");
   body.innerHTML = `<p class="dim">Cargando skills…</p>`;
 
@@ -149,9 +163,39 @@ async function openCharModal(id) {
     ${
       isAdmin
         ? `
-      <div style="display:flex; gap:8px; margin-bottom:16px; align-items:center;">
-        <input id="edit-link-url" placeholder="Link externo (https://…)" value="${c.link_url ? escapeHtml(c.link_url) : ""}" style="flex:1;" />
-        <button class="btn btn-ghost" id="save-link-btn">Guardar link</button>
+      <div class="panel" style="padding:14px; margin-bottom:18px; border-left:3px solid var(--red);">
+        <div class="add-grid">
+          <div>
+            <label>Nombre</label>
+            <input id="edit-name" value="${escapeHtml(c.name)}" />
+          </div>
+          <div>
+            <label>Subtipo / etiqueta</label>
+            <input id="edit-subtype" value="${escapeHtml(c.subtype || "")}" />
+          </div>
+          <div>
+            <label>Rol</label>
+            <input id="edit-role" value="${escapeHtml(c.role || "")}" />
+          </div>
+          <div>
+            <label>Color de fondo</label>
+            <input id="edit-color-bg" type="color" value="${c.color_bg}" />
+          </div>
+          <div>
+            <label>Color de texto</label>
+            <input id="edit-color-text" type="color" value="${c.color_text}" />
+          </div>
+          <div>
+            <label>Reemplazar imagen</label>
+            <input id="edit-image" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>Link externo</label>
+            <input id="edit-link-url" placeholder="https://…" value="${c.link_url ? escapeHtml(c.link_url) : ""}" />
+          </div>
+        </div>
+        <button class="btn btn-primary" id="save-edit-char-btn" style="margin-top:12px;">Guardar cambios</button>
+        <span id="edit-char-status" class="dim" style="margin-left:10px; font-size:13px;"></span>
       </div>
     `
         : ""
@@ -181,10 +225,47 @@ async function openCharModal(id) {
   `;
 
   if (isAdmin) {
-    document.getElementById("save-link-btn").onclick = async () => {
-      const url = document.getElementById("edit-link-url").value.trim();
-      await sb.from("characters").update({ link_url: url || null }).eq("id", id);
+    document.getElementById("save-edit-char-btn").onclick = async () => {
+      const statusEl = document.getElementById("edit-char-status");
+      const name = document.getElementById("edit-name").value.trim();
+      if (!name) {
+        statusEl.textContent = "El nombre no puede estar vacío.";
+        return;
+      }
+
+      statusEl.textContent = "Guardando…";
+
+      const payload = {
+        name,
+        subtype: document.getElementById("edit-subtype").value.trim(),
+        role: document.getElementById("edit-role").value.trim(),
+        color_bg: document.getElementById("edit-color-bg").value,
+        color_text: document.getElementById("edit-color-text").value,
+        link_url: document.getElementById("edit-link-url").value.trim() || null,
+      };
+
+      const fileInput = document.getElementById("edit-image");
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const path = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+        const { error: uploadError } = await sb.storage.from("character-images").upload(path, file);
+        if (uploadError) {
+          statusEl.textContent = "Error subiendo imagen: " + uploadError.message;
+          return;
+        }
+        const { data: urlData } = sb.storage.from("character-images").getPublicUrl(path);
+        payload.avatar_url = urlData.publicUrl;
+      }
+
+      const { error: updateError } = await sb.from("characters").update(payload).eq("id", id);
+      if (updateError) {
+        statusEl.textContent = "Error: " + updateError.message;
+        return;
+      }
+
+      statusEl.textContent = "Guardado ✓";
       await loadCharacters();
+      document.getElementById("modal-char-name").textContent = name;
     };
 
     document.getElementById("add-action-btn").onclick = async () => {
