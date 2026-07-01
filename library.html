@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biblioteca — Menhera</title>
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/library.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<div class="crt-vignette"></div>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow">Canal 03</div>
+    <h1>Biblioteca</h1>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="wrap">
+
+    <div class="filters panel">
+      <div>
+        <label>Jefe</label>
+        <select id="filter-boss"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label>Personaje DPS</label>
+        <select id="filter-dps"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label>Buscar por título</label>
+        <input id="filter-search" placeholder="ej. Akechi, sweeper…" />
+      </div>
+    </div>
+
+    <div id="rotation-list" class="rotation-list" style="margin-top:20px;">
+      <p class="dim">Cargando biblioteca…</p>
+    </div>
+
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/components.js"></script>
+<script src="js/library.js"></script>
+<script>mountChrome('library');</script>
+</body>
+</html>

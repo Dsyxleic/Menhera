@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Menhera — P5:TPX Rotation Terminal</title>
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<div class="crt-vignette"></div>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow flicker">Persona 5: The Phantom X</div>
+    <h1>MENHERA</h1>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="wrap">
+    <div class="home-grid">
+
+      <a class="home-card panel" href="tactic-maker.html">
+        <div class="home-card-ch">02</div>
+        <h3>Constructor</h3>
+        <span class="home-card-cta">Entrar →</span>
+      </a>
+
+      <a class="home-card panel" href="library.html">
+        <div class="home-card-ch">03</div>
+        <h3>Biblioteca</h3>
+        <span class="home-card-cta">Entrar →</span>
+      </a>
+
+      <a class="home-card panel" href="leaderboard.html">
+        <div class="home-card-ch">04</div>
+        <h3>Puntuaciones</h3>
+        <span class="home-card-cta">Entrar →</span>
+      </a>
+
+      <a class="home-card panel" href="characters.html">
+        <div class="home-card-ch">05</div>
+        <h3>Personajes</h3>
+        <span class="home-card-cta">Entrar →</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/components.js"></script>
+<script>mountChrome('home');</script>
+
+<style>
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.home-card {
+  display: block;
+  padding: 22px;
+  position: relative;
+  transition: border-color 0.15s, transform 0.15s;
+  border-left: 3px solid var(--red-deep);
+}
+.home-card:hover {
+  border-left-color: var(--red);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.home-card-ch {
+  font-family: var(--f-mono);
+  color: var(--red-deep);
+  font-size: 22px;
+}
+.home-card h3 {
+  margin: 8px 0 10px;
+  font-size: 22px;
+}
+.home-card p {
+  color: var(--bone-dim);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+.home-card-cta {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  color: var(--red-glow);
+}
+</style>
+</body>
+</html>

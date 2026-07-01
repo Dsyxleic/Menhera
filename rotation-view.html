@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rotación — Menhera</title>
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/tactic-maker.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<div class="crt-vignette"></div>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow">Canal 03 // Biblioteca</div>
+    <h1 id="rv-title">Cargando…</h1>
+    <p id="rv-meta" class="mono"></p>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="wrap">
+    <div id="rv-notes" class="panel hidden" style="padding:16px 20px; margin-bottom:18px;"></div>
+    <div id="rv-wonder" class="panel hidden" style="padding:16px 20px; margin-bottom:18px;"></div>
+    <div id="rv-target"></div>
+    <div style="margin-top:18px;">
+      <a class="btn btn-ghost" href="library.html">← Volver a la biblioteca</a>
+      <a class="btn btn-ghost hidden" data-admin-only id="rv-edit-link">Editar esta rotación</a>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/components.js"></script>
+<script src="js/rotation-view.js"></script>
+<script>mountChrome('library');</script>
+</body>
+</html>

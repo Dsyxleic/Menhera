@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Puntuaciones — Menhera</title>
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/leaderboard.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<div class="crt-vignette"></div>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow">Canal 04</div>
+    <h1>Puntuaciones</h1>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="wrap">
+
+    <div class="panel lb-toolbar">
+      <div>
+        <label>Semana</label>
+        <select id="week-select"></select>
+      </div>
+      <button class="btn btn-ghost hidden" id="new-week-btn" data-admin-only>+ Nueva semana</button>
+      <button class="btn btn-primary hidden" id="save-lb-btn" data-admin-only>Guardar puntuaciones</button>
+      <span id="lb-status" class="dim"></span>
+    </div>
+
+    <div class="lb-columns">
+      <div>
+        <h3>Compañío A</h3>
+        <table class="lb-table" id="table-A"></table>
+      </div>
+      <div>
+        <h3>Compañío B</h3>
+        <table class="lb-table" id="table-B"></table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/components.js"></script>
+<script src="js/leaderboard.js"></script>
+<script>mountChrome('leaderboard');</script>
+</body>
+</html>

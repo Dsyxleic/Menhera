@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Personajes — Menhera</title>
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/characters.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="crt-overlay"></div>
+<div class="crt-vignette"></div>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="eyebrow">Canal 05</div>
+    <h1>Personajes</h1>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="wrap">
+
+    <div id="add-character-panel" class="panel add-character-panel hidden" data-admin-only>
+      <h3 style="margin-bottom:14px;">Añadir personaje</h3>
+      <div class="add-grid">
+        <div>
+          <label>Nombre</label>
+          <input id="new-name" placeholder="ej. CROW" />
+        </div>
+        <div>
+          <label>Subtipo / etiqueta</label>
+          <input id="new-subtype" placeholder="ej. Seaside" />
+        </div>
+        <div>
+          <label>Rol</label>
+          <input id="new-role" placeholder="ej. DPS, Support, Wonder" />
+        </div>
+        <div>
+          <label>Color de fondo</label>
+          <input id="new-color-bg" type="color" value="#7a0c14" />
+        </div>
+        <div>
+          <label>Color de texto</label>
+          <input id="new-color-text" type="color" value="#efe6dd" />
+        </div>
+        <div>
+          <label>Imagen</label>
+          <input id="new-image" type="file" accept="image/*" />
+        </div>
+      </div>
+      <button class="btn btn-primary" id="save-character-btn" style="margin-top:14px;">Guardar personaje</button>
+      <span id="char-save-status" class="dim" style="margin-left:12px; font-size:13px;"></span>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:24px 0 14px;">
+      <h3>Roster</h3>
+      <button class="btn btn-ghost hidden" id="toggle-add-btn" data-admin-only>+ Nuevo personaje</button>
+    </div>
+
+    <div id="character-grid" class="character-grid">
+      <p class="dim">Cargando roster…</p>
+    </div>
+
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<!-- Modal de detalle / gestión de skills -->
+<div id="char-modal" class="modal-backdrop hidden">
+  <div class="modal panel">
+    <div class="modal-head">
+      <h3 id="modal-char-name">—</h3>
+      <button class="btn btn-ghost" id="modal-close-btn">Cerrar</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/components.js"></script>
+<script src="js/characters.js"></script>
+<script>mountChrome('characters');</script>
+</body>
+</html>
