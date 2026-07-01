@@ -74,7 +74,7 @@ async function loadRotation() {
   const charMap = {};
   (chars || []).forEach((c) => (charMap[c.id] = c));
 
-  const TAG_COLORS = { hl: "#e8c34a", navi: "#9fe6a0", teurgia: "#9fd0f0" };
+  const TAG_COLORS = { hl: "#e8c34a", navi: "#9fe6a0", teurgia: "#9fd0f0", miku: "#39c5bb", extra: "#c99ee8" };
 
   let html = `<table class="export-table" style="width:100%;">
     <thead><tr>${grid.columns.map((id) => {
@@ -87,9 +87,11 @@ async function loadRotation() {
     <tbody>`;
 
   (grid.turns || []).forEach((turn) => {
+    const turnColor = turn.tag ? TAG_COLORS[turn.tag] : null;
+    const rowStyle = turnColor ? ` style="background:${turnColor}29;"` : "";
     const maxRows = Math.max(1, ...turn.cells.map((c) => c.length));
     for (let row = 0; row < maxRows; row++) {
-      html += "<tr>";
+      html += `<tr${rowStyle}>`;
       turn.cells.forEach((cell) => {
         const entry = cell[row];
         const color = entry?.tag ? TAG_COLORS[entry.tag] : null;
@@ -110,5 +112,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("[data-admin-only]").forEach((el) => {
       el.classList.toggle("hidden", !MenheraAuth.getIsAdmin());
     });
+  });
+
+  document.getElementById("rv-delete-btn").addEventListener("click", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (!id) return;
+    if (!confirm("¿Eliminar esta rotación? No se puede deshacer.")) return;
+    const { error } = await sb.from("rotations").delete().eq("id", id);
+    if (error) {
+      alert("Error: " + error.message);
+      return;
+    }
+    window.location.href = "library.html";
   });
 });

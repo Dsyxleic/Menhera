@@ -29,24 +29,31 @@
 <section class="page-body">
   <div class="wrap">
 
-    <div class="panel lb-toolbar">
-      <div>
-        <label>Semana</label>
-        <select id="week-select"></select>
-      </div>
-      <button class="btn btn-ghost hidden" id="new-week-btn" data-admin-only>+ Nueva semana</button>
-      <button class="btn btn-primary hidden" id="save-lb-btn" data-admin-only>Guardar puntuaciones</button>
-      <span id="lb-status" class="dim"></span>
+    <div id="lb-private-notice" class="panel hidden" style="padding:16px 20px; margin-bottom:18px; border-left:3px solid var(--red-deep);">
+      <span class="dim">Esta sección es solo para administradores.</span>
     </div>
 
-    <div class="lb-columns">
-      <div>
-        <h3>Compañío A</h3>
-        <table class="lb-table" id="table-A"></table>
+    <div id="lb-root" class="hidden" data-admin-only>
+      <div class="panel lb-toolbar">
+        <div>
+          <label>Semana</label>
+          <select id="week-select"></select>
+        </div>
+        <button class="btn btn-ghost hidden" id="new-week-btn" data-admin-only>+ Nueva semana</button>
+        <button class="btn btn-primary hidden" id="save-lb-btn" data-admin-only>Guardar puntuaciones</button>
+        <button class="btn btn-ghost" id="export-lb-img-btn">Exportar como imagen</button>
+        <span id="lb-status" class="dim"></span>
       </div>
-      <div>
-        <h3>Compañío B</h3>
-        <table class="lb-table" id="table-B"></table>
+
+      <div class="lb-columns" id="lb-export-target">
+        <div>
+          <h3>Compañío A</h3>
+          <table class="lb-table" id="table-A"></table>
+        </div>
+        <div>
+          <h3>Compañío B</h3>
+          <table class="lb-table" id="table-B"></table>
+        </div>
       </div>
     </div>
 
@@ -58,6 +65,7 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/components.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="js/leaderboard.js"></script>
 <script>mountChrome('leaderboard');</script>
 </body>

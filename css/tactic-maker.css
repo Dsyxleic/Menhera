@@ -21,13 +21,23 @@
 }
 .turn-index {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   font-family: var(--f-display);
   font-size: 24px;
   color: var(--red-deep);
   background: var(--panel);
   border: 1px solid var(--line);
+  padding: 10px 4px;
+}
+.turn-tag-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  max-width: 40px;
 }
 .turn-cols {
   display: grid;

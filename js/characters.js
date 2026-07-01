@@ -27,8 +27,9 @@ async function loadCharacters() {
     .map(
       (c) => `
       <div class="char-card panel" data-id="${c.id}" style="--card-accent:${c.color_bg};">
-        <div class="char-card-img">
+        <div class="char-card-img" data-link-target="${c.link_url ? escapeHtml(c.link_url) : ""}">
           ${c.avatar_url ? `<img src="${c.avatar_url}" alt="${escapeHtml(c.name)}" />` : `<span class="no-img">Sin imagen</span>`}
+          ${c.link_url ? `<span class="link-badge" title="Tiene link externo">🔗</span>` : ""}
         </div>
         <div class="char-card-body">
           <div class="char-card-name">${escapeHtml(c.name)}</div>
@@ -38,6 +39,16 @@ async function loadCharacters() {
     `
     )
     .join("");
+
+  grid.querySelectorAll(".char-card-img").forEach((img) => {
+    img.addEventListener("click", (e) => {
+      const url = img.dataset.linkTarget;
+      if (url) {
+        e.stopPropagation();
+        window.open(url, "_blank", "noopener");
+      }
+    });
+  });
 
   grid.querySelectorAll(".char-card").forEach((card) => {
     card.addEventListener("click", () => openCharModal(card.dataset.id));
@@ -59,6 +70,7 @@ async function saveNewCharacter() {
   const role = document.getElementById("new-role").value.trim();
   const colorBg = document.getElementById("new-color-bg").value;
   const colorText = document.getElementById("new-color-text").value;
+  const linkUrl = document.getElementById("new-link").value.trim();
   const fileInput = document.getElementById("new-image");
 
   if (!name) {
@@ -91,6 +103,7 @@ async function saveNewCharacter() {
     color_bg: colorBg,
     color_text: colorText,
     avatar_url: avatarUrl,
+    link_url: linkUrl || null,
     sort_order: CHAR_CACHE.length,
   });
 
@@ -103,6 +116,7 @@ async function saveNewCharacter() {
   document.getElementById("new-name").value = "";
   document.getElementById("new-subtype").value = "";
   document.getElementById("new-role").value = "";
+  document.getElementById("new-link").value = "";
   fileInput.value = "";
   await loadCharacters();
 }
@@ -132,6 +146,16 @@ async function openCharModal(id) {
   }
 
   body.innerHTML = `
+    ${
+      isAdmin
+        ? `
+      <div style="display:flex; gap:8px; margin-bottom:16px; align-items:center;">
+        <input id="edit-link-url" placeholder="Link externo (https://…)" value="${c.link_url ? escapeHtml(c.link_url) : ""}" style="flex:1;" />
+        <button class="btn btn-ghost" id="save-link-btn">Guardar link</button>
+      </div>
+    `
+        : ""
+    }
     <div id="action-list">
       ${(actions || [])
         .map(
@@ -157,6 +181,12 @@ async function openCharModal(id) {
   `;
 
   if (isAdmin) {
+    document.getElementById("save-link-btn").onclick = async () => {
+      const url = document.getElementById("edit-link-url").value.trim();
+      await sb.from("characters").update({ link_url: url || null }).eq("id", id);
+      await loadCharacters();
+    };
+
     document.getElementById("add-action-btn").onclick = async () => {
       const label = document.getElementById("new-action-label").value.trim();
       if (!label) return;

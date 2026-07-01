@@ -81,6 +81,7 @@ function renderList() {
           <div class="rotation-card-actions">
             <a class="btn btn-ghost" href="rotation-view.html?id=${r.id}">Ver</a>
             <a class="btn btn-ghost hidden" data-admin-only href="tactic-maker.html?id=${r.id}">Editar</a>
+            <button class="btn btn-ghost hidden" data-admin-only data-delete-id="${r.id}">Eliminar</button>
           </div>
         </div>
       `;
@@ -89,6 +90,18 @@ function renderList() {
 
   document.querySelectorAll("[data-admin-only]").forEach((el) => {
     el.classList.toggle("hidden", !MenheraAuth.getIsAdmin());
+  });
+
+  list.querySelectorAll("[data-delete-id]").forEach((btn) => {
+    btn.onclick = async () => {
+      if (!confirm("¿Eliminar esta rotación? No se puede deshacer.")) return;
+      const { error } = await sb.from("rotations").delete().eq("id", btn.dataset.deleteId);
+      if (error) {
+        alert("Error: " + error.message);
+        return;
+      }
+      await loadLibrary();
+    };
   });
 }
 

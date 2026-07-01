@@ -39,6 +39,24 @@
   justify-content: center;
   background: var(--panel-raised);
   padding: 10px;
+  position: relative;
+}
+.link-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 13px;
+  background: rgba(10,9,8,0.75);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.char-card-img[data-link-target]:not([data-link-target=""]) {
+  cursor: pointer;
 }
 .char-card-img img {
   max-width: 100%;

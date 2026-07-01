@@ -15,6 +15,8 @@ const TAG_DEFS = [
   { key: "hl", label: "HL", color: "#e8c34a" },
   { key: "navi", label: "Navi", color: "#9fe6a0" },
   { key: "teurgia", label: "Teurgia", color: "#9fd0f0" },
+  { key: "miku", label: "Miku", color: "#39c5bb" },
+  { key: "extra", label: "Extra", color: "#c99ee8" },
 ];
 
 function tagDef(key) {
@@ -32,7 +34,7 @@ function emptyEntry(characterId) {
 function newTurn() {
   const cells = [];
   for (let i = 0; i < COLUMN_COUNT; i++) cells.push([]);
-  return { cells };
+  return { tag: null, cells };
 }
 
 // ---------------- Carga inicial ----------------
@@ -206,9 +208,36 @@ function renderTurns() {
     const row = document.createElement("div");
     row.className = "turn-row";
 
+    const turnTagDef = tagDef(turn.tag);
+
     const idxEl = document.createElement("div");
     idxEl.className = "turn-index";
-    idxEl.textContent = turnIdx + 1;
+    if (turnTagDef) {
+      idxEl.style.background = hexToRgba(turnTagDef.color, 0.22);
+      idxEl.style.borderColor = turnTagDef.color;
+      idxEl.style.color = turnTagDef.color;
+    }
+
+    const idxNum = document.createElement("div");
+    idxNum.textContent = turnIdx + 1;
+    idxEl.appendChild(idxNum);
+
+    const idxDots = document.createElement("div");
+    idxDots.className = "turn-tag-dots";
+    TAG_DEFS.forEach((t) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "tag-dot" + (turn.tag === t.key ? " is-active" : "");
+      dot.style.background = t.color;
+      dot.title = "Colorear turno: " + t.label;
+      dot.onclick = () => {
+        turn.tag = turn.tag === t.key ? null : t.key;
+        renderTurns();
+      };
+      idxDots.appendChild(dot);
+    });
+    idxEl.appendChild(idxDots);
+
     row.appendChild(idxEl);
 
     const colsWrap = document.createElement("div");
@@ -222,6 +251,10 @@ function renderTurns() {
 
       const cell = document.createElement("div");
       cell.className = "turn-cell";
+      if (turnTagDef) {
+        cell.style.background = hexToRgba(turnTagDef.color, 0.10);
+        cell.style.borderTopColor = turnTagDef.color;
+      }
 
       const head = document.createElement("div");
       head.className = "turn-cell-head";
@@ -472,9 +505,11 @@ function renderExportPreview() {
       <tbody>`;
 
   TURNS.forEach((turn, i) => {
+    const turnTag = tagDef(turn.tag);
+    const rowStyle = turnTag ? ` style="background:${hexToRgba(turnTag.color, 0.16)};"` : "";
     const maxRows = Math.max(1, ...turn.cells.map((c) => c.length));
     for (let r = 0; r < maxRows; r++) {
-      html += "<tr>";
+      html += `<tr${rowStyle}>`;
       turn.cells.forEach((cell) => {
         const entry = cell[r];
         const tag = entry ? tagDef(entry.tag) : null;
@@ -510,8 +545,14 @@ document.addEventListener("DOMContentLoaded", () => {
 // ---------------- Exportar / importar como archivo (para invitados) ----------------
 
 function exportRotationJSON() {
+  const title = document.getElementById("rot-title").value.trim();
+  if (!title) {
+    document.getElementById("save-status").textContent = "Ponle un título antes de exportar.";
+    return;
+  }
+
   const data = {
-    title: document.getElementById("rot-title").value.trim(),
+    title,
     notes: document.getElementById("rot-notes").value.trim(),
     boss_id: document.getElementById("rot-boss").value || null,
     game_mode_id: document.getElementById("rot-mode").value || null,
@@ -531,9 +572,13 @@ function exportRotationJSON() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = (data.title || "rotacion").replace(/[^a-z0-9\-_ ]/gi, "").trim() + ".menhera.json";
+  const filename = title.replace(/[^a-z0-9\-_ ]/gi, "").trim() + ".menhera.json";
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+
+  document.getElementById("save-status").textContent =
+    `Descargado "${filename}" — mándaselo a 1x10d por Discord para que lo publique.`;
 }
 
 async function importRotationJSON(file) {

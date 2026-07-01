@@ -30,8 +30,9 @@ async function loadPersonas() {
     .map(
       (p) => `
       <div class="char-card panel" data-id="${p.id}">
-        <div class="char-card-img">
+        <div class="char-card-img" data-link-target="${p.link_url ? escapeHtmlP(p.link_url) : ""}">
           ${p.avatar_url ? `<img src="${p.avatar_url}" alt="${escapeHtmlP(p.name)}" />` : `<span class="no-img">Sin imagen</span>`}
+          ${p.link_url ? `<span class="link-badge" title="Tiene link externo">🔗</span>` : ""}
         </div>
         <div class="char-card-body">
           <div class="char-card-name">${escapeHtmlP(p.name)}</div>
@@ -41,6 +42,16 @@ async function loadPersonas() {
     )
     .join("");
 
+  grid.querySelectorAll(".char-card-img").forEach((img) => {
+    img.addEventListener("click", (e) => {
+      const url = img.dataset.linkTarget;
+      if (url) {
+        e.stopPropagation();
+        window.open(url, "_blank", "noopener");
+      }
+    });
+  });
+
   grid.querySelectorAll(".char-card").forEach((card) => {
     card.addEventListener("click", () => openPersonaModal(card.dataset.id));
   });
@@ -49,6 +60,7 @@ async function loadPersonas() {
 async function saveNewPersona() {
   const statusEl = document.getElementById("persona-save-status");
   const name = document.getElementById("new-persona-name").value.trim();
+  const linkUrl = document.getElementById("new-persona-link").value.trim();
   const fileInput = document.getElementById("new-persona-image");
 
   if (!name) {
@@ -74,6 +86,7 @@ async function saveNewPersona() {
   const { error } = await sb.from("personas").insert({
     name,
     avatar_url: avatarUrl,
+    link_url: linkUrl || null,
     sort_order: PERSONA_CACHE.length,
   });
 
@@ -84,6 +97,7 @@ async function saveNewPersona() {
 
   statusEl.textContent = "Guardado ✓";
   document.getElementById("new-persona-name").value = "";
+  document.getElementById("new-persona-link").value = "";
   fileInput.value = "";
   await loadPersonas();
 }
@@ -111,6 +125,16 @@ async function openPersonaModal(id) {
   }
 
   body.innerHTML = `
+    ${
+      isAdmin
+        ? `
+      <div style="display:flex; gap:8px; margin-bottom:16px; align-items:center;">
+        <input id="edit-persona-link-url" placeholder="Link externo (https://…)" value="${p.link_url ? escapeHtmlP(p.link_url) : ""}" style="flex:1;" />
+        <button class="btn btn-ghost" id="save-persona-link-btn">Guardar link</button>
+      </div>
+    `
+        : ""
+    }
     <div id="persona-skill-list">
       ${(skills || [])
         .map(
@@ -136,6 +160,12 @@ async function openPersonaModal(id) {
   `;
 
   if (isAdmin) {
+    document.getElementById("save-persona-link-btn").onclick = async () => {
+      const url = document.getElementById("edit-persona-link-url").value.trim();
+      await sb.from("personas").update({ link_url: url || null }).eq("id", id);
+      await loadPersonas();
+    };
+
     document.getElementById("add-persona-skill-btn").onclick = async () => {
       const label = document.getElementById("new-persona-skill").value.trim();
       if (!label) return;

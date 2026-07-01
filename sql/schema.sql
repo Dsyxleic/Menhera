@@ -27,6 +27,7 @@ create table if not exists characters (
   subtype text,              -- ej: "Seaside", "Tropical"
   role text,                 -- ej: "DPS", "Support", "Wonder"
   avatar_url text,
+  link_url text,             -- al hacer clic en la foto, lleva aquí
   color_bg text not null default '#2c1f21',
   color_text text not null default '#efe6dd',
   sort_order int default 0,
@@ -61,6 +62,7 @@ create table if not exists personas (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   avatar_url text,
+  link_url text,             -- al hacer clic en la foto, lleva aquí
   sort_order int default 0,
   created_at timestamptz default now()
 );
@@ -137,8 +139,6 @@ create policy "public read game_modes" on game_modes for select using (true);
 create policy "public read personas" on personas for select using (true);
 create policy "public read persona_skills" on persona_skills for select using (true);
 create policy "public read rotations" on rotations for select using (true);
-create policy "public read leaderboard_weeks" on leaderboard_weeks for select using (true);
-create policy "public read leaderboard_entries" on leaderboard_entries for select using (true);
 
 -- Escritura solo admin
 create policy "admin write characters" on characters for all using (is_admin()) with check (is_admin());
