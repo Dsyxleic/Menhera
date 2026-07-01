@@ -14,12 +14,14 @@ function renderHeader(activePage) {
     { href: "leaderboard.html", ch: "04", label: "PUNTUACIONES", key: "leaderboard" },
     { href: "characters.html", ch: "05", label: "PERSONAJES", key: "characters" },
     { href: "personas.html", ch: "06", label: "PERSONAS", key: "personas" },
+    { href: "buzon.html", ch: "07", label: "BUZÓN", key: "buzon" },
   ];
 
   el.innerHTML = `
     <header class="site-header">
       <div class="wrap">
         <div class="logo">
+          <img src="assets/brand.png" alt="" class="logo-mark-img" />
           <span class="mark">MENHERA</span>
           <span class="sub">P5:TPX</span>
         </div>
@@ -45,7 +47,10 @@ function renderFooter() {
   el.innerHTML = `
     <footer class="site-footer">
       <div class="wrap">
-        <div class="footer-brand">MENHERA</div>
+        <div class="footer-brand">
+          <img src="assets/brand.png" alt="" class="footer-brand-img" />
+          MENHERA
+        </div>
         <div class="footer-credits">
           <span><span class="label">Discord</span>1x10d</span>
           <span><span class="label">Contacto</span>dsyxleic24@gmail.com</span>

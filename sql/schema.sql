@@ -105,6 +105,15 @@ create table if not exists leaderboard_entries (
   unique (week_id, company, puesto)
 );
 
+-- 7) Buzón de mensajes (cualquiera escribe, solo el admin lee)
+create table if not exists messages (
+  id uuid primary key default gen_random_uuid(),
+  author text,
+  content text not null,
+  is_read boolean not null default false,
+  created_at timestamptz default now()
+);
+
 -- ============================================================
 -- Row Level Security: todo el mundo puede LEER, solo admins ESCRIBEN
 -- ============================================================
@@ -118,6 +127,7 @@ alter table rotations enable row level security;
 alter table leaderboard_weeks enable row level security;
 alter table leaderboard_entries enable row level security;
 alter table admins enable row level security;
+alter table messages enable row level security;
 
 -- Lectura pública
 create policy "public read characters" on characters for select using (true);
@@ -140,6 +150,12 @@ create policy "admin write persona_skills" on persona_skills for all using (is_a
 create policy "admin write rotations" on rotations for all using (is_admin()) with check (is_admin());
 create policy "admin write leaderboard_weeks" on leaderboard_weeks for all using (is_admin()) with check (is_admin());
 create policy "admin write leaderboard_entries" on leaderboard_entries for all using (is_admin()) with check (is_admin());
+
+-- Buzón: cualquiera envía, solo el admin lee/gestiona
+create policy "anyone can send messages" on messages for insert with check (true);
+create policy "admin read messages" on messages for select using (is_admin());
+create policy "admin update messages" on messages for update using (is_admin()) with check (is_admin());
+create policy "admin delete messages" on messages for delete using (is_admin());
 
 -- admins: nadie puede leer/escribir esta tabla desde el cliente (se gestiona a mano desde el dashboard)
 create policy "no client access to admins" on admins for all using (false);

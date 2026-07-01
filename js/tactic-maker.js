@@ -507,6 +507,69 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// ---------------- Exportar / importar como archivo (para invitados) ----------------
+
+function exportRotationJSON() {
+  const data = {
+    title: document.getElementById("rot-title").value.trim(),
+    notes: document.getElementById("rot-notes").value.trim(),
+    boss_id: document.getElementById("rot-boss").value || null,
+    game_mode_id: document.getElementById("rot-mode").value || null,
+    dps_character_id: document.getElementById("rot-dps").value || null,
+    wonder_knife: document.getElementById("wonder-knife").value.trim(),
+    grid: {
+      columns: getColumnAssignments(),
+      turns: TURNS,
+      wonder: {
+        knife: document.getElementById("wonder-knife").value.trim(),
+        personas: WONDER_PERSONAS,
+      },
+    },
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (data.title || "rotacion").replace(/[^a-z0-9\-_ ]/gi, "").trim() + ".menhera.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importRotationJSON(file) {
+  const statusEl = document.getElementById("save-status");
+  let data;
+  try {
+    data = JSON.parse(await file.text());
+  } catch (e) {
+    statusEl.textContent = "Ese archivo no es válido.";
+    return;
+  }
+
+  EDITING_ROTATION_ID = null; // se guardará como rotación nueva
+
+  document.getElementById("rot-title").value = data.title || "";
+  document.getElementById("rot-notes").value = data.notes || "";
+  document.getElementById("wonder-knife").value = data.wonder_knife || data.grid?.wonder?.knife || "";
+  if (data.boss_id) document.getElementById("rot-boss").value = data.boss_id;
+  if (data.game_mode_id) document.getElementById("rot-mode").value = data.game_mode_id;
+  if (data.dps_character_id) document.getElementById("rot-dps").value = data.dps_character_id;
+
+  const grid = data.grid || { columns: [], turns: [] };
+  COLUMN_COUNT = grid.columns?.length || 4;
+  TURNS = grid.turns || [];
+  WONDER_PERSONAS = grid.wonder?.personas || [null, null, null];
+
+  renderColumnSelectors();
+  const selects = document.querySelectorAll(".col-select");
+  selects.forEach((s, i) => { if (grid.columns && grid.columns[i]) s.value = grid.columns[i]; });
+
+  renderTurns();
+  renderWonderPersonaSlots();
+
+  statusEl.textContent = "Archivo importado — revísalo y dale a \"Guardar rotación\" para archivarlo.";
+}
+
 // ---------------- Init ----------------
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -514,6 +577,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("save-rotation-btn").addEventListener("click", saveRotation);
   document.getElementById("new-boss-btn").addEventListener("click", createBoss);
   document.getElementById("new-mode-btn").addEventListener("click", createGameMode);
+  document.getElementById("export-json-btn").addEventListener("click", exportRotationJSON);
+  document.getElementById("import-json-input").addEventListener("change", (e) => {
+    if (e.target.files[0]) importRotationJSON(e.target.files[0]);
+    e.target.value = "";
+  });
 
   await loadAllActions();
   await loadRosterAndBosses();
@@ -529,7 +597,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   MenheraAuth.onChange(({ isAdmin }) => {
-    document.getElementById("maker-root").classList.toggle("hidden", !isAdmin);
-    document.getElementById("readonly-notice").classList.toggle("hidden", isAdmin);
+    document.getElementById("guest-notice").classList.toggle("hidden", isAdmin);
   });
 });

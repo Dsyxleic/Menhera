@@ -1,0 +1,37 @@
+.buzon-form {
+  padding: 22px;
+  max-width: 560px;
+}
+
+.inbox-item {
+  padding: 14px 16px;
+  border-left: 3px solid var(--red-deep);
+  margin-bottom: 10px;
+}
+.inbox-item.is-unread {
+  border-left-color: var(--red);
+  background: rgba(216,30,44,0.06);
+}
+.inbox-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--bone-dim);
+  margin-bottom: 6px;
+}
+.inbox-item-content {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.inbox-item-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+.inbox-item-actions .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+}

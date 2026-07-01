@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Biblioteca — Menhera</title>
 <link rel="icon" type="image/png" href="assets/favicon-32.png" sizes="32x32" />
 <link rel="icon" type="image/png" href="assets/favicon-16.png" sizes="16x16" />
 <link rel="apple-touch-icon" href="assets/favicon-180.png" />
 <link rel="shortcut icon" href="assets/favicon.ico" />
+<title>Buzón — Menhera</title>
 <link rel="stylesheet" href="css/theme.css" />
 <link rel="stylesheet" href="css/layout.css" />
-<link rel="stylesheet" href="css/library.css" />
+<link rel="stylesheet" href="css/buzon.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -21,35 +21,30 @@
 
 <section class="page-hero">
   <div class="wrap">
-    <div class="eyebrow">Canal 03</div>
-    <h1>Biblioteca</h1>
+    <div class="eyebrow">Canal 07</div>
+    <h1>Buzón</h1>
   </div>
 </section>
 
 <section class="page-body">
   <div class="wrap">
 
-    <div class="filters panel">
-      <div>
-        <label>Jefe</label>
-        <select id="filter-boss"><option value="">Todos</option></select>
+    <div class="panel buzon-form">
+      <div style="margin-bottom:12px;">
+        <label>Tu nombre (opcional)</label>
+        <input id="msg-author" placeholder="ej. tu nick de Discord" style="width:100%; max-width:320px; margin-top:4px;" />
       </div>
-      <div>
-        <label>Modo de juego</label>
-        <select id="filter-mode"><option value="">Todos</option></select>
+      <div style="margin-bottom:14px;">
+        <label>Mensaje</label>
+        <textarea id="msg-content" rows="4" style="width:100%; margin-top:4px;" placeholder="Sugerencias, bugs, lo que sea…"></textarea>
       </div>
-      <div>
-        <label>Personaje DPS</label>
-        <select id="filter-dps"><option value="">Todos</option></select>
-      </div>
-      <div>
-        <label>Buscar por título</label>
-        <input id="filter-search" placeholder="ej. Akechi, sweeper…" />
-      </div>
+      <button class="btn btn-primary" id="send-msg-btn">Enviar</button>
+      <span id="msg-status" class="dim" style="margin-left:12px; font-size:13px;"></span>
     </div>
 
-    <div id="rotation-list" class="rotation-list" style="margin-top:20px;">
-      <p class="dim">Cargando biblioteca…</p>
+    <div id="inbox-section" class="hidden" data-admin-only style="margin-top:32px;">
+      <h3 style="margin-bottom:14px;">Bandeja de entrada</h3>
+      <div id="inbox-list"></div>
     </div>
 
   </div>
@@ -60,7 +55,7 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/components.js"></script>
-<script src="js/library.js"></script>
-<script>mountChrome('library');</script>
+<script src="js/buzon.js"></script>
+<script>mountChrome('buzon');</script>
 </body>
 </html>

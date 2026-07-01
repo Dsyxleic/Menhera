@@ -24,6 +24,12 @@
   gap: 8px;
   cursor: default;
 }
+.logo-mark-img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  align-self: center;
+}
 .logo .mark {
   font-family: var(--f-display);
   font-size: 22px;
@@ -96,6 +102,14 @@
   font-family: var(--f-mono);
   font-size: 13px;
   color: var(--bone-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-brand-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 .footer-credits {
   display: flex;
