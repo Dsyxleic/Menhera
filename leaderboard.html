@@ -37,7 +37,10 @@
       <div class="panel lb-toolbar">
         <div>
           <label>Semana</label>
-          <select id="week-select"></select>
+          <div style="display:flex; gap:6px;">
+            <select id="week-select" style="flex:1;"></select>
+            <button class="btn btn-ghost hidden" id="rename-week-btn" data-admin-only title="Renombrar semana">✎</button>
+          </div>
         </div>
         <button class="btn btn-ghost hidden" id="new-week-btn" data-admin-only>+ Nueva semana</button>
         <button class="btn btn-primary hidden" id="save-lb-btn" data-admin-only>Guardar puntuaciones</button>
@@ -59,25 +62,25 @@
           <details class="import-box">
             <summary>Importar desde texto</summary>
             <textarea id="import-text-A" rows="6" placeholder="1,Benyamin Hibiki,3074180924&#10;2,FengShui Salesman,2527569740&#10;…"></textarea>
-            <button class="btn btn-ghost" id="import-btn-A">Importar en Guild 1</button>
+            <button class="btn btn-ghost" id="import-btn-A">Importar en Menhera 1</button>
           </details>
         </div>
         <div>
           <details class="import-box">
             <summary>Importar desde texto</summary>
             <textarea id="import-text-B" rows="6" placeholder="1,Benyamin Hibiki,3074180924&#10;2,FengShui Salesman,2527569740&#10;…"></textarea>
-            <button class="btn btn-ghost" id="import-btn-B">Importar en Guild 2</button>
+            <button class="btn btn-ghost" id="import-btn-B">Importar en Menhera 2</button>
           </details>
         </div>
       </div>
 
       <div class="lb-columns" id="lb-export-target" style="margin-top:14px;">
         <div>
-          <h3>Guild 1</h3>
+          <h3>Menhera 1</h3>
           <table class="lb-table" id="table-A"></table>
         </div>
         <div>
-          <h3>Guild 2</h3>
+          <h3>Menhera 2</h3>
           <table class="lb-table" id="table-B"></table>
         </div>
       </div>

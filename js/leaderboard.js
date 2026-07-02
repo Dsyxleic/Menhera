@@ -4,7 +4,7 @@
 
 let CURRENT_WEEK_ID = null;
 let CURRENT_ENTRIES = { A: {}, B: {} }; // puesto -> {nombre, puntos}
-const COMPANY_LABELS = { A: "Guild 1", B: "Guild 2" };
+const COMPANY_LABELS = { A: "Menhera 1", B: "Menhera 2" };
 
 function escapeHtml(s) {
   return (s || "").replace(/[&<>"']/g, (c) => ({
@@ -161,6 +161,32 @@ function importPastedText(company) {
   statusEl.textContent = `Importadas ${count} filas en ${COMPANY_LABELS[company]} — revisa y dale a "Guardar puntuaciones".`;
 }
 
+async function renameWeek() {
+  if (!CURRENT_WEEK_ID) {
+    document.getElementById("lb-status").textContent = "Elige una semana primero.";
+    return;
+  }
+  const idToKeep = CURRENT_WEEK_ID;
+  const select = document.getElementById("week-select");
+  const currentLabel = select.selectedOptions[0]?.textContent || "";
+  const newLabel = prompt("Nuevo nombre para esta semana:", currentLabel);
+  if (!newLabel || newLabel.trim() === currentLabel) return;
+
+  const { error } = await sb
+    .from("leaderboard_weeks")
+    .update({ week_label: newLabel.trim() })
+    .eq("id", idToKeep);
+
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
+  await loadWeeks();
+  document.getElementById("week-select").value = idToKeep;
+  CURRENT_WEEK_ID = idToKeep;
+  await loadWeekEntries();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadWeeks();
 
@@ -169,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadWeekEntries();
   });
   document.getElementById("new-week-btn").addEventListener("click", createWeek);
+  document.getElementById("rename-week-btn").addEventListener("click", renameWeek);
   document.getElementById("save-lb-btn").addEventListener("click", saveLeaderboard);
   document.getElementById("export-lb-img-btn").addEventListener("click", exportLeaderboardImage);
   document.getElementById("import-btn-A").addEventListener("click", () => importPastedText("A"));
