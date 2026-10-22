@@ -12,6 +12,29 @@ function escapeHtml(s) {
   }[c]));
 }
 
+// Convierte "11089782k" -> 11089782000, "12.5k" -> 12500, "1,2m" -> 1200000,
+// "703432192" -> 703432192, "1.234.567" -> 1234567
+function parsePuntos(raw) {
+  const s = String(raw || "").trim().toLowerCase().replace(/\s/g, "");
+  const m = s.match(/^([\d.,]+)([km]?)$/);
+  if (!m) return NaN;
+
+  let num = m[1];
+  const suf = m[2];
+  const mult = suf === "k" ? 1e3 : suf === "m" ? 1e6 : 1;
+
+  if (suf && /^\d+[.,]\d{1,2}$/.test(num)) {
+    // decimal tipo 12.5k o 12,5k
+    num = num.replace(",", ".");
+  } else {
+    // separadores de miles
+    num = num.replace(/[.,]/g, "");
+  }
+
+  const n = parseFloat(num);
+  return isNaN(n) ? NaN : Math.round(n * mult);
+}
+
 async function loadWeeks() {
   const { data } = await sb.from("leaderboard_weeks").select("*").order("created_at", { ascending: false });
   const select = document.getElementById("week-select");
@@ -56,7 +79,7 @@ function renderTables() {
           <tr data-company="${company}" data-puesto="${puesto}">
             <td class="puesto">${puesto}</td>
             <td><input type="text" class="lb-nombre" value="${escapeHtml(entry.nombre)}" /></td>
-            <td><input type="number" class="lb-puntos" value="${entry.puntos}" /></td>
+            <td><input type="text" inputmode="numeric" class="lb-puntos" value="${entry.puntos}" placeholder="ej. 9417683k" /></td>
           </tr>
         `;
       } else {
@@ -90,12 +113,13 @@ async function saveLeaderboard() {
       const nombre = tr.querySelector(".lb-nombre").value.trim();
       const puntosRaw = tr.querySelector(".lb-puntos").value;
       if (!nombre && !puntosRaw) return;
+      const puntos = parsePuntos(puntosRaw);
       rows.push({
         week_id: CURRENT_WEEK_ID,
         company,
         puesto,
         nombre: nombre || "—",
-        puntos: puntosRaw ? parseInt(puntosRaw, 10) : 0,
+        puntos: isNaN(puntos) ? 0 : puntos,
       });
     });
   });
@@ -150,7 +174,7 @@ function importPastedText(company) {
       nombre = parts.slice(0, parts.length - 1).join(" ");
     }
 
-    const puntos = parseInt(puntosRaw.replace(/[^\d]/g, ""), 10);
+    const puntos = parsePuntos(puntosRaw);
     if (!nombre || isNaN(puntos) || puesto < 1 || puesto > 30) return;
 
     CURRENT_ENTRIES[company][puesto] = { nombre, puntos };
